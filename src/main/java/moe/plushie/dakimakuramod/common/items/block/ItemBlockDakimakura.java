@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class ItemBlockDakimakura extends ModItemBlock {
-    
+
     public ItemBlockDakimakura(Block block) {
         super(block);
         setMaxStackSize(1);
@@ -37,7 +37,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
         list.add(new ItemStack(item, 1, 0));
         ArrayList<Daki> dakiList = DakimakuraMod.getProxy().getDakimakuraManager().getDakiList();
         for (int i = 0; i < dakiList.size(); i++) {
-            ItemStack itemStack = new ItemStack(item, 1, i+1);
+            ItemStack itemStack = new ItemStack(item, 1, i + 1);
             itemStack.setTagCompound(new NBTTagCompound());
             Daki daki = dakiList.get(i);
             DakiNbtSerializer.serialize(daki, itemStack.getTagCompound());
@@ -54,7 +54,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
         }
         return DakiNbtSerializer.isFlipped(itemStack.getTagCompound());
     }
-    
+
     public static ItemStack setFlipped(ItemStack itemStack, boolean flipped) {
         if (itemStack == null) {
             return null;
@@ -65,7 +65,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
         DakiNbtSerializer.setFlipped(itemStack.getTagCompound(), flipped);
         return itemStack;
     }
-    
+
     @Override
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer entityPlayer) {
         if (entityPlayer.isSneaking()) {
@@ -74,7 +74,18 @@ public class ItemBlockDakimakura extends ModItemBlock {
         }
         return itemStack;
     }
-    
+
+    @Override
+    public void onUpdate(ItemStack itemStack, World p_77663_2_, Entity p_77663_3_, int p_77663_4_, boolean p_77663_5_) {
+        if (itemStack.getItemDamage() > 0 && itemStack.getTagCompound() == null && itemStack.getItemDamage() <= DakimakuraMod.getProxy().getDakimakuraManager().getDakiList().toArray().length) {
+            ArrayList<Daki> dakiList = DakimakuraMod.getProxy().getDakimakuraManager().getDakiList();
+            itemStack.setTagCompound(new NBTTagCompound());
+            Daki daki = dakiList.get(itemStack.getItemDamage() - 1);
+            DakiNbtSerializer.serialize(daki, itemStack.getTagCompound());
+        }
+        super.onUpdate(itemStack, p_77663_2_, p_77663_3_, p_77663_4_, p_77663_5_);
+    }
+
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer entityPlayer, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
         Block block = world.getBlock(x, y, z);
@@ -92,8 +103,8 @@ public class ItemBlockDakimakura extends ModItemBlock {
         } else if (y == 255 && this.field_150939_a.getMaterial().isSolid()) {
             return false;
         } else if (world.canPlaceEntityOnSide(this.field_150939_a, x, y, z, false, side, entityPlayer, itemStack)) {
-            int rot = (MathHelper.floor_double((double)(entityPlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3);
-            ForgeDirection[] rots = new ForgeDirection[] {ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH, ForgeDirection.WEST};
+            int rot = (MathHelper.floor_double((double) (entityPlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3);
+            ForgeDirection[] rots = new ForgeDirection[]{ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH, ForgeDirection.WEST};
             ForgeDirection rotation = rots[rot].getOpposite();
             if (canPlaceDakiAt(world, entityPlayer, itemStack, x, y, z, sideDir, rotation)) {
                 if (block.isBed(world, x, y, z, entityPlayer) & side == 1) {
@@ -109,7 +120,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
             return false;
         }
     }
-    
+
     private void placeAsEntity(World world, EntityPlayer entityPlayer, ItemStack itemStack, int x, int y, int z, ForgeDirection side, ForgeDirection rotation) {
         if (world.isRemote) {
             return;
@@ -121,10 +132,10 @@ public class ItemBlockDakimakura extends ModItemBlock {
         entityDakimakura.setFlipped(isFlipped(itemStack));
         entityDakimakura.setRotation(rotation);
         world.spawnEntityInWorld(entityDakimakura);
-        world.playSoundEffect((double)((float)x + 0.5F), (double)((float)y + 0.5F), (double)((float)z + 0.5F), this.field_150939_a.stepSound.func_150496_b(), (this.field_150939_a.stepSound.getVolume() + 1.0F) / 2.0F, this.field_150939_a.stepSound.getPitch() * 0.8F);
+        world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), this.field_150939_a.stepSound.func_150496_b(), (this.field_150939_a.stepSound.getVolume() + 1.0F) / 2.0F, this.field_150939_a.stepSound.getPitch() * 0.8F);
         --itemStack.stackSize;
     }
-    
+
     private boolean canPlaceDakiAt(World world, EntityPlayer entityPlayer, ItemStack itemStack, int x, int y, int z, ForgeDirection side, ForgeDirection rotation) {
         if (canPlaceAtLocation(world, entityPlayer, itemStack, x, y, z, side)) {
             if (side != ForgeDirection.UP) {
@@ -143,7 +154,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
         }
         return false;
     }
-    
+
     private boolean canPlaceAtLocation(World world, EntityPlayer entityPlayer, ItemStack itemStack, int x, int y, int z, ForgeDirection side) {
         Block block = world.getBlock(x, y, z);
         if (!entityPlayer.canPlayerEdit(x, y, z, side.ordinal(), itemStack)) {
@@ -155,13 +166,13 @@ public class ItemBlockDakimakura extends ModItemBlock {
         }
         return true;
     }
-    
+
     private void placeDakiAt(World world, EntityPlayer entityPlayer, ItemStack itemStack, int x, int y, int z, ForgeDirection side, ForgeDirection rotation) {
         int meta = 0;
         meta = BlockDakimakura.setRotationOnMeta(meta, rotation);
         meta = BlockDakimakura.setStandingOnMeta(meta, false);
         meta = BlockDakimakura.setTopPartOnMeta(meta, false);
-        
+
         if (side != ForgeDirection.UP & side != ForgeDirection.DOWN) {
             meta = BlockDakimakura.setRotationOnMeta(meta, side.getOpposite());
             meta = BlockDakimakura.setStandingOnMeta(meta, true);
@@ -172,24 +183,24 @@ public class ItemBlockDakimakura extends ModItemBlock {
             rotation = ForgeDirection.UP;
             y--;
         }
-        
+
         // Placing bottom part.
         placeBlockAt(itemStack, entityPlayer, world, x, y, z, side.ordinal(), 0, 0, 0, meta);
-        world.playSoundEffect((double)((float)x + 0.5F), (double)((float)y + 0.5F), (double)((float)z + 0.5F), this.field_150939_a.stepSound.func_150496_b(), (this.field_150939_a.stepSound.getVolume() + 1.0F) / 2.0F, this.field_150939_a.stepSound.getPitch() * 0.8F);
+        world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), this.field_150939_a.stepSound.func_150496_b(), (this.field_150939_a.stepSound.getVolume() + 1.0F) / 2.0F, this.field_150939_a.stepSound.getPitch() * 0.8F);
         --itemStack.stackSize;
         world.markBlockForUpdate(x, y, z);
-        
-        
+
+
         meta = BlockDakimakura.setTopPartOnMeta(meta, true);
         x += rotation.offsetX;
         y += rotation.offsetY;
         z += rotation.offsetZ;
-        
+
         // Placing top part.
         placeBlockAt(itemStack, entityPlayer, world, x, y, z, side.ordinal(), 0, 0, 0, meta);
         world.markBlockForUpdate(x, y, z);
     }
-    
+
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
         if (!world.setBlock(x, y, z, field_150939_a, metadata, 2)) {
@@ -201,7 +212,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
         }
         return true;
     }
-    
+
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer player, List list, boolean advancedItemTooltips) {
@@ -215,7 +226,7 @@ public class ItemBlockDakimakura extends ModItemBlock {
             list.add(StatCollector.translateToLocal(itemStack.getUnlocalizedName() + ".tooltip.blank"));
         }
     }
-    
+
     @SideOnly(Side.CLIENT)
     @Override
     public boolean func_150936_a(World world, int x, int y, int z, int side, EntityPlayer entityPlayer, ItemStack itemStack) {
@@ -229,6 +240,6 @@ public class ItemBlockDakimakura extends ModItemBlock {
             y += sideDir.offsetY;
             z += sideDir.offsetZ;
         }
-        return world.canPlaceEntityOnSide(Blocks.stone, x, y, z, false, side, (Entity)null, itemStack);
+        return world.canPlaceEntityOnSide(Blocks.stone, x, y, z, false, side, (Entity) null, itemStack);
     }
 }

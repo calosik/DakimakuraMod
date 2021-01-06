@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 
 public abstract class AbstractModItem extends Item {
 
@@ -27,7 +28,7 @@ public abstract class AbstractModItem extends Item {
         setMaxStackSize(1);
         setNoRepair();
     }
-    
+
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer player, List list, boolean advancedItemTooltips) {
